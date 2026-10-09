@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatBrief — WhatsApp Chat Summarizer</title>
+  
+  <!-- Fonts: Plus Jakarta Sans / Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            dark: {
+              950: '#080c14',
+              900: '#0f172a',
+              850: '#131d33',
+              800: '#1e293b',
+              700: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body class="bg-[#080c14] text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Ambient Background Glow -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-brand-500/10 blur-[130px] rounded-full"></div>
+    <div class="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-emerald-700/5 blur-[150px] rounded-full"></div>
+    <div class="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-teal-900/10 blur-[160px] rounded-full"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-[#080c14]/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 p-[1px] shadow-lg shadow-brand-500/20">
+          <div class="w-full h-full bg-[#080c14] rounded-xl flex items-center justify-center">
+            <i data-lucide="message-square-quote" class="w-5 h-5 text-brand-400"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+              Chat<span class="text-brand-400">Brief</span>
+            </h1>
+            <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              v1.0
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">WhatsApp Chat Intelligence & Summarizer</p>
+        </div>
+      </div>
+
+      <!-- Right Navigation Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Active Engine Pill -->
+        <button id="btnOpenApiModal" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700/70 bg-slate-900/60 hover:bg-slate-800/80 transition-all text-xs font-medium text-slate-300">
+          <span id="engineDot" class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span>
+          <span id="engineLabel">Local NLP Engine</span>
+          <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i>
+        </button>
+
+        <!-- New Chat Reset Button (hidden when no chat) -->
+        <button id="btnResetChat" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 transition-all">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>New Chat</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- UPLOAD & WELCOME HERO VIEW (Shown initially) -->
+    <section id="uploadSection" class="transition-all duration-300">
+      
+      <!-- Hero Intro -->
+      <div class="text-center max-w-3xl mx-auto mb-10 pt-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-4">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+          Instant Conversation Summarization & Extraction
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+          Turn Thousands of WhatsApp Messages into <span class="bg-gradient-to-r from-brand-400 via-emerald-300 to-teal-200 bg-clip-text text-transparent">Actionable Clarity</span>.
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Drop your exported WhatsApp <code class="font-mono text-xs bg-slate-800 px-1.5 py-0.5 rounded text-brand-300">.txt</code> chat to extract executive summaries, key decisions, promises, timelines, and action items with assignees.
+        </p>
+      </div>
+
+      <!-- Controls & Dropzone Card -->
+      <div class="max-w-3xl mx-auto">
+        
+        <!-- Summary Length Selector -->
+        <div class="mb-5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 ml-1">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-400"></i>
+            Summary Depth:
+          </span>
+          <div class="grid grid-cols-3 gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800/80 w-full sm:w-auto">
+            <button type="button" data-length="short" class="length-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white">
+              Short (⚡)
+            </button>
+            <button type="button" data-length="medium" class="length-btn active-length-btn px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-brand-500 text-white shadow-md shadow-brand-500/20">
+              Medium (⚖️)
+            </button>
+            <button type="button" data-length="detailed" class="length-btn px-4 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-400 hover:text-white">
+              Detailed (🔍)
+            </button>
+          </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div id="dropZone" class="group relative rounded-3xl border-2 border-dashed border-slate-700/80 hover:border-brand-500/80 bg-slate-900/40 hover:bg-slate-900/70 p-8 sm:p-12 text-center transition-all duration-300 cursor-pointer overflow-hidden">
+          
+          <input type="file" id="fileInput" accept=".txt" class="hidden">
+          
+          <div class="flex flex-col items-center justify-center gap-4">
+            
+            <div class="w-16 h-16 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 group-hover:scale-110 group-hover:bg-brand-500/20 transition-all duration-300">
+              <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+            </div>
+
+            <div>
+              <p class="text-base sm:text-lg font-semibold text-white mb-1">
+                Drop your WhatsApp <span class="text-brand-400">.txt</span> file here
+              </p>
+              <p class="text-xs text-slate-400">
+                or click to browse your computer
+              </p>
+            </div>
+
+            <div class="flex items-center gap-4 text-[11px] text-slate-500 pt-2">
+              <span class="flex items-center gap-1">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-400"></i> Local & Private
+              </span>
+              <span>•</span>
+              <span class="flex items-center gap-1">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-400"></i> iOS & Android
+              </span>
+              <span>•</span>
+              <span class="flex items-center gap-1">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-brand-400"></i> Up to 50MB
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Alternative Input & Quick Demo Samples -->
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          
+          <!-- Sample Chats Quick Load -->
+          <div class="flex items-center flex-wrap gap-2">
+            <span class="text-xs font-medium text-slate-400">Try Sample:</span>
+            <button id="btnSampleSprint" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-brand-300 border border-slate-800 hover:border-brand-500/40 transition-all flex items-center gap-1.5">
+              <i data-lucide="briefcase" class="w-3.5 h-3.5 text-brand-400"></i>
+              Startup Sprint Sync
+            </button>
+            <button id="btnSampleVacation" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-brand-300 border border-slate-800 hover:border-brand-500/40 transition-all flex items-center gap-1.5">
+              <i data-lucide="compass" class="w-3.5 h-3.5 text-emerald-400"></i>
+              Tahoe Road Trip
+            </button>
+          </div>
+
+          <!-- Direct Paste Toggle -->
+          <button id="btnTogglePaste" class="text-xs font-medium text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+            <i data-lucide="clipboard-edit" class="w-3.5 h-3.5"></i>
+            Paste raw chat text instead
+          </button>
+
+        </div>
+
+        <!-- Paste Text Area Container (collapsible) -->
+        <div id="pasteContainer" class="hidden mt-4 p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-semibold text-slate-300">Paste WhatsApp Chat Text:</label>
+            <button id="btnClosePaste" class="text-xs text-slate-400 hover:text-white">Cancel</button>
+          </div>
+          <textarea id="rawTextarea" rows="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500" placeholder="12/05/2023, 10:14 - Alice: Hey team..."></textarea>
+          <div class="mt-3 flex justify-end">
+            <button id="btnSubmitPaste" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              Analyze Pasted Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- How to Export Guide Card -->
+        <div class="mt-10 rounded-2xl bg-slate-900/40 border border-slate-800/80 p-5">
+          <div class="flex items-start gap-3">
+            <div class="p-2 rounded-lg bg-brand-500/10 text-brand-400 mt-0.5">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+                How to export a WhatsApp chat:
+              </h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Open WhatsApp on your phone &rarr; Open the desired Chat/Group &rarr; Tap the contact/group name at the top (or ⋮ More) &rarr; Tap <strong class="text-slate-200">Export Chat</strong> &rarr; Select <strong class="text-slate-200">Without Media</strong> &rarr; Save or share the resulting <code class="font-mono text-[11px] bg-slate-800 px-1 py-0.5 rounded text-brand-300">.txt</code> file here.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- LOADING / PROGRESS STATE -->
+    <section id="loadingSection" class="hidden max-w-xl mx-auto py-16 text-center">
+      <div class="relative w-20 h-20 mx-auto mb-6">
+        <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
+        <div class="absolute inset-0 rounded-full border-4 border-brand-500 border-t-transparent animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-brand-400">
+          <i data-lucide="bot" class="w-7 h-7"></i>
+        </div>
+      </div>
+      
+      <h3 id="loadingStatusTitle" class="text-xl font-bold text-white mb-2">Analyzing WhatsApp Chat...</h3>
+      <p id="loadingStatusDesc" class="text-xs text-slate-400 max-w-sm mx-auto">
+        Parsing timestamps, sender entities, and extracting conversation intelligence.
+      </p>
+
+      <div class="mt-6 max-w-xs mx-auto bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
+        <div id="loadingProgressBar" class="h-full bg-gradient-to-r from-brand-500 to-emerald-300 w-1/3 animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD RESULTS VIEW (Shown when analyzed) -->
+    <section id="resultsSection" class="hidden space-y-6">
+      
+      <!-- Top Overview Bar -->
+      <div class="p-6 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        
+        <div>
+          <div class="flex items-center gap-3 flex-wrap mb-2">
+            <span id="resFileName" class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-text" class="w-5 h-5 text-brand-400"></i>
+              <span>chat.txt</span>
+            </span>
+            <span id="resEngineBadge" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              Local NLP
+            </span>
+            <span id="resToneBadge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              Tone: Collaborative
+            </span>
+          </div>
+          
+          <div class="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span id="resDateSpan">Oct 14 - Oct 18</span>
+            </span>
+            <span>•</span>
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span id="resParticipantCount">4 Participants</span>
+            </span>
+            <span>•</span>
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="message-square" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span id="resMessageCount">24 Messages</span>
+            </span>
+            <span>•</span>
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span id="resPeakHour">Peak: 10:00 AM</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Actions & Length Re-toggle -->
+        <div class="flex items-center gap-3 flex-wrap">
+          
+          <!-- Length Selector Inside Dashboard -->
+          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button type="button" data-res-length="short" class="res-length-btn px-3 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-all">
+              Short
+            </button>
+            <button type="button" data-res-length="medium" class="res-length-btn px-3 py-1 rounded-lg text-xs font-semibold bg-brand-500 text-white shadow-sm transition-all">
+              Medium
+            </button>
+            <button type="button" data-res-length="detailed" class="res-length-btn px-3 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-all">
+              Detailed
+            </button>
+          </div>
+
+          <!-- Copy Button -->
+          <button id="btnCopySummary" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700/60 flex items-center gap-1.5 transition-all shadow-sm">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="copyBtnText">Copy</span>
+          </button>
+
+          <!-- Download Dropdown -->
+          <div class="relative inline-block text-left">
+            <button id="btnDownloadDropdown" class="px-3.5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-brand-500/20">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Download</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+            </button>
+            
+            <div id="downloadMenu" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50">
+              <button id="dlMarkdown" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2">
+                <i data-lucide="file-code" class="w-3.5 h-3.5 text-brand-400"></i> Markdown (.md)
+              </button>
+              <button id="dlText" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-400"></i> Plain Text (.txt)
+              </button>
+              <button id="dlJson" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2">
+                <i data-lucide="braces" class="w-3.5 h-3.5 text-teal-400"></i> Structured JSON (.json)
+              </button>
+              <div class="border-t border-slate-800 my-1"></div>
+              <button id="dlPrint" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2">
+                <i data-lucide="printer" class="w-3.5 h-3.5 text-cyan-400"></i> Print / Save as PDF
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Quick Stats Ribbon -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/70 flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-brand-500/10 text-brand-400">
+            <i data-lucide="messages-square" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">Messages</p>
+            <p id="kpiMessages" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/70 flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+            <i data-lucide="check-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">Decisions</p>
+            <p id="kpiDecisions" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/70 flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
+            <i data-lucide="check-square" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">Action Items</p>
+            <p id="kpiActions" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900/50 border border-slate-800/70 flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-rose-500/10 text-rose-400">
+            <i data-lucide="help-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">Unanswered</p>
+            <p id="kpiUnanswered" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+
+        <div class="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-slate-900/50 border border-slate-800/70 flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] text-slate-400 font-medium">Active Members</p>
+            <p id="kpiMembers" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center gap-2 border-b border-slate-800 overflow-x-auto pb-1 scrollbar-none">
+        <button data-tab="tabOverview" class="tab-btn active-tab px-4 py-2 text-xs font-semibold rounded-t-xl text-brand-400 border-b-2 border-brand-400 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Executive Summary & Topics
+        </button>
+        <button data-tab="tabDecisions" class="tab-btn px-4 py-2 text-xs font-medium rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="target" class="w-4 h-4"></i> Decisions & Commitments
+        </button>
+        <button data-tab="tabActions" class="tab-btn px-4 py-2 text-xs font-medium rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="list-todo" class="w-4 h-4"></i> Action Items
+        </button>
+        <button data-tab="tabQuestions" class="tab-btn px-4 py-2 text-xs font-medium rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="help-circle" class="w-4 h-4"></i> Unanswered Questions
+        </button>
+        <button data-tab="tabTimeline" class="tab-btn px-4 py-2 text-xs font-medium rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="history" class="w-4 h-4"></i> Timeline
+        </button>
+        <button data-tab="tabParticipants" class="tab-btn px-4 py-2 text-xs font-medium rounded-t-xl text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+          <i data-lucide="pie-chart" class="w-4 h-4"></i> Analytics & Chat Logs
+        </button>
+      </div>
+
+      <!-- TAB CONTENT: 1. OVERVIEW & TOPICS -->
+      <div id="tabOverview" class="tab-pane space-y-6">
+        
+        <!-- Summary Narrative Card -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="file-text" class="w-4 h-4 text-brand-400"></i>
+              Executive Overview
+            </h3>
+            <span id="badgeSummaryLength" class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+              Medium Detail
+            </span>
+          </div>
+
+          <div id="summaryNarrative" class="text-sm sm:text-base text-slate-200 leading-relaxed font-normal whitespace-pre-line space-y-3">
+            Loading summary narrative...
+          </div>
+
+          <!-- Key Highlights Bullet List -->
+          <div id="highlightsContainer" class="mt-6 pt-5 border-t border-slate-800/80">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Key Takeaways:
+            </h4>
+            <ul id="highlightsList" class="space-y-2"></ul>
+          </div>
+        </div>
+
+        <!-- Main Topics Grid -->
+        <div>
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4 flex items-center gap-2">
+            <i data-lucide="layers" class="w-4 h-4 text-brand-400"></i>
+            Key Conversation Topics
+          </h3>
+          <div id="topicsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+      </div>
+
+      <!-- TAB CONTENT: 2. DECISIONS & COMMITMENTS -->
+      <div id="tabDecisions" class="tab-pane hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Concrete Decisions -->
+          <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                Decisions Finalized
+              </h3>
+              <span id="countDecisionsBadge" class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">0</span>
+            </div>
+            <div id="decisionsList" class="space-y-3"></div>
+          </div>
+
+          <!-- Promises & Commitments -->
+          <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="handshake" class="w-4 h-4 text-cyan-400"></i>
+                Promises & Commitments
+              </h3>
+              <span id="countPromisesBadge" class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold">0</span>
+            </div>
+            <div id="promisesList" class="space-y-3"></div>
+          </div>
+
+        </div>
+
+        <!-- Upcoming Plans -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="calendar-clock" class="w-4 h-4 text-teal-400"></i>
+              Upcoming Plans & Events
+            </h3>
+            <span id="countPlansBadge" class="text-xs px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 font-semibold">0</span>
+          </div>
+          <div id="plansList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: 3. ACTION ITEMS -->
+      <div id="tabActions" class="tab-pane hidden space-y-6">
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="check-square" class="w-4 h-4 text-brand-400"></i>
+                Action Items & Responsibilities
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Delegated tasks, responsible assignees, and stated deadlines.</p>
+            </div>
+            
+            <button id="btnCopyActionChecklist" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 hover:text-white font-medium flex items-center gap-1.5 self-start sm:self-auto transition-all">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              Copy Checklist
+            </button>
+          </div>
+
+          <div id="actionsList" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: 4. UNANSWERED QUESTIONS -->
+      <div id="tabQuestions" class="tab-pane hidden space-y-6">
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i data-lucide="help-circle" class="w-4 h-4 text-rose-400"></i>
+                Unanswered Questions & Hanging Inquiries
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Queries asked in the conversation that never received a decisive resolution.</p>
+            </div>
+            <span id="countQuestionsBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">0</span>
+          </div>
+
+          <div id="questionsList" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: 5. TIMELINE -->
+      <div id="tabTimeline" class="tab-pane hidden space-y-6">
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-6 flex items-center gap-2">
+            <i data-lucide="milestone" class="w-4 h-4 text-brand-400"></i>
+            Chronological Turning Points & Milestones
+          </h3>
+
+          <div id="timelineContainer" class="relative pl-6 space-y-8 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-800"></div>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: 6. PARTICIPANTS & CHAT LOGS -->
+      <div id="tabParticipants" class="tab-pane hidden space-y-6">
+        
+        <!-- Participant Stats Grid -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4 flex items-center gap-2">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-brand-400"></i>
+            Participant Contribution & Activity
+          </h3>
+          <div id="participantsList" class="space-y-4"></div>
+        </div>
+
+        <!-- Raw Message Log Inspector -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="search" class="w-4 h-4 text-brand-400"></i>
+              Transcript Inspector
+            </h3>
+            
+            <!-- Message Search Box -->
+            <div class="relative w-full sm:w-64">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="filterMsgInput" placeholder="Search message text..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500">
+            </div>
+          </div>
+
+          <div id="rawMessagesContainer" class="max-h-96 overflow-y-auto space-y-2 pr-2 scrollbar-thin"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- GEMINI API KEY & SETTINGS MODAL -->
+  <div id="apiModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      
+      <button id="btnCloseApiModal" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2.5 rounded-xl bg-brand-500/10 text-brand-400">
+          <i data-lucide="key" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Google Gemini AI Engine</h3>
+          <p class="text-xs text-slate-400">Configure deep generative conversation analysis</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            Gemini API Key
+          </label>
+          <div class="relative">
+            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-brand-500">
+            <button type="button" id="toggleApiKeyVis" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">
+            Keys are saved locally in your browser. Get a key at <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-brand-400 hover:underline">Google AI Studio</a>.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            AI Model
+          </label>
+          <select id="modelSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Fastest & Smartest)</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+          </select>
+        </div>
+
+        <div id="keyValidationFeedback" class="hidden p-3 rounded-xl text-xs"></div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" id="btnClearKey" class="text-xs text-rose-400 hover:text-rose-300 font-medium">
+            Clear Key (Use Local NLP)
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnTestKey" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-all">
+              Test Connection
+            </button>
+            <button type="button" id="btnSaveKey" class="px-4 py-1.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-semibold text-white shadow-md shadow-brand-500/20 transition-all">
+              Save
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl text-xs font-medium text-white">
+    <i id="toastIcon" data-lucide="check" class="w-4 h-4 text-brand-400"></i>
+    <span id="toastMsg">Action complete</span>
+  </div>
+
+  <!-- Frontend Logic -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

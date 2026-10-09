@@ -1,0 +1,20 @@
+14/10/2024, 09:30 - Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.
+14/10/2024, 09:31 - Alex Morgan: Good morning team! We have our Beta release this Friday. Let's do a quick sync on blockers and responsibilities.
+14/10/2024, 09:33 - Priya Sharma: Morning Alex! The Stripe payment gateway integration is 90% done. I'm testing webhooks for recurring subscriptions right now.
+14/10/2024, 09:34 - David Chen: Frontend dashboard is ready, but we need the final SVG icons from Maya before we can push to staging.
+14/10/2024, 09:35 - Maya Lin: Hey! I just finalized the icon set and exported them to Figma. Let me send the zip link here.
+14/10/2024, 09:36 - Maya Lin: <Media omitted>
+14/10/2024, 09:37 - Maya Lin: I will also prepare the marketing hero banners by tomorrow 2 PM.
+14/10/2024, 09:39 - Alex Morgan: Great progress Maya! David, can you integrate Maya's icons into the production build by today 6 PM?
+14/10/2024, 09:40 - David Chen: Yes, I'll take care of the icon integration before 6 PM today.
+14/10/2024, 09:42 - Alex Morgan: We decided to deploy the backend on AWS Frankfurt (eu-central-1) instead of us-east-1 due to GDPR compliance requirements.
+14/10/2024, 09:44 - Priya Sharma: Agreed, Frankfurt is much safer for our European enterprise pilot customers.
+14/10/2024, 09:45 - Priya Sharma: By the way, did anyone get written approval from legal for the updated privacy policy terms?
+14/10/2024, 09:47 - Alex Morgan: That's a crucial point. Let me check with Sarah from legal.
+14/10/2024, 09:48 - David Chen: Also, what is our maximum spending limit on the Google Cloud Vision API for user image moderation?
+14/10/2024, 09:50 - Alex Morgan: Let's cap moderation at $250/month for now. We confirmed that in yesterday's leadership call.
+14/10/2024, 09:52 - Maya Lin: Are we still doing the team demo on Thursday at 4 PM?
+14/10/2024, 09:53 - Alex Morgan: Yes! Meeting on Thursday at 4 PM confirmed for full product dry run.
+14/10/2024, 09:55 - Priya Sharma: I will make sure the database migration scripts are tested on a replica by Wednesday evening.
+14/10/2024, 09:56 - David Chen: Sounds solid. I'll also run automated Lighthouse accessibility tests tonight.
+14/10/2024, 09:58 - Alex Morgan: Awesome sync everyone. Let's make this launch smooth!

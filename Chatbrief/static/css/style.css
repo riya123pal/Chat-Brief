@@ -1,0 +1,115 @@
+/* ChatBrief Custom Aesthetics & Utility Styles */
+
+/* Subtle Glassmorphism Card Hover Effects */
+.glass-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Custom Thin Scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tab button active state */
+.tab-btn.active-tab {
+  color: #34d399;
+  border-bottom: 2px solid #10b981;
+}
+
+/* Action item check animation */
+.task-checkbox:checked + span {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+/* Drag over visual feedback */
+.drag-active {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  transform: scale(1.01);
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+  }
+
+  header,
+  #btnOpenApiModal,
+  #btnResetChat,
+  #uploadSection,
+  #loadingSection,
+  .tab-btn,
+  #btnCopySummary,
+  #btnDownloadDropdown,
+  .res-length-btn,
+  #apiModal,
+  #toast {
+    display: none !important;
+  }
+
+  #resultsSection {
+    display: block !important;
+  }
+
+  .tab-pane {
+    display: block !important;
+    margin-bottom: 2rem !important;
+    page-break-inside: avoid;
+  }
+
+  .glass-card,
+  .p-6,
+  .p-4 {
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+
+  h1, h2, h3, h4, strong {
+    color: #047857 !important;
+  }
+
+  p, span, li {
+    color: #334155 !important;
+  }
+
+  #rawMessagesContainer {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
